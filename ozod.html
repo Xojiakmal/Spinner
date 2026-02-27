@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>🎡 Baraban So'z O'yini</title>
+<style>
+  :root{
+    --bg1:#0b1020; --bg2:#0a0f1a;
+    --panel:rgba(18,26,43,.92);
+    --text:#eaf0ff; --muted:#9bb0d6;
+    --accent:#7c5cff; --accent2:#22d3ee;
+    --good:#22c55e; --bad:#ef4444; --gold:#fbbf24;
+    --line:rgba(255,255,255,.10);
+    --shadow: 0 18px 60px rgba(0,0,0,.55);
+    --r:22px;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; min-height:100vh;
+    display:flex; align-items:flex-start; justify-content:center;
+    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+    color:var(--text);
+    background:
+      radial-gradient(1100px 700px at 20% 10%, rgba(124,92,255,.35), transparent 60%),
+      radial-gradient(900px 600px at 80% 30%, rgba(34,211,238,.25), transparent 55%),
+      radial-gradient(800px 500px at 50% 90%, rgba(251,191,36,.18), transparent 60%),
+      linear-gradient(180deg, var(--bg1), var(--bg2));
+    padding:22px;
+  }
+
+  .wrapper{
+    width: min(1300px, 100%);
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  /* TOP: O'yin */
+  .gameRow{
+    display:grid;
+    grid-template-columns: 420px 1fr;
+    gap:18px;
+  }
+
+  .panel{
+    background: linear-gradient(180deg, var(--panel), rgba(15,22,38,.90));
+    border:1px solid var(--line);
+    box-shadow: var(--shadow);
+    border-radius: var(--r);
+    padding:18px;
+    position:relative;
+    overflow:hidden;
+  }
+  .panel::before{
+    content:"";
+    position:absolute; inset:-120px;
+    background: conic-gradient(from 220deg, rgba(124,92,255,.18), rgba(34,211,238,.12), rgba(251,191,36,.12), rgba(124,92,255,.18));
+    filter: blur(24px);
+    opacity:.65;
+    z-index:0;
+  }
+  .panel > *{ position:relative; z-index:1; }
+  h1{ margin:0 0 8px; font-size:20px; letter-spacing:.2px; }
+  h2{ margin:0 0 14px; font-size:16px; }
+  .sub{ margin:0 0 14px; color:var(--muted); font-size:13px; line-height:1.4; }
+
+  .wheelWrap{ display:flex; flex-direction:column; gap:12px; align-items:center; justify-content:center; padding:8px 6px 12px; }
+
+  .pointer{
+    width:0;height:0;
+    border-left:14px solid transparent;
+    border-right:14px solid transparent;
+    border-bottom:22px solid var(--gold);
+    filter: drop-shadow(0 10px 10px rgba(0,0,0,.40));
+    margin-bottom:-8px;
+  }
+
+  .wheelBox{
+    width:300px; height:300px;
+    position:relative;
+    display:flex; align-items:center; justify-content:center;
+  }
+
+  .wheel{
+    width:280px; height:280px;
+    border-radius:50%;
+    position:relative;
+    transform: rotate(0deg);
+    transition: transform 2.9s cubic-bezier(.12,.86,.12,1);
+    box-shadow:
+      0 0 0 10px rgba(255,255,255,.06),
+      0 0 0 2px rgba(255,255,255,.12),
+      0 25px 70px rgba(0,0,0,.65);
+    user-select:none;
+    overflow:hidden;
+    background:
+      conic-gradient(
+        rgba(124,92,255,.95),
+        rgba(34,211,238,.88),
+        rgba(251,191,36,.85),
+        rgba(34,197,94,.85),
+        rgba(239,68,68,.78),
+        rgba(124,92,255,.95)
+      );
+  }
+
+  .wheel.win{
+    box-shadow:
+      0 0 0 10px rgba(34,197,94,.20),
+      0 0 0 2px rgba(34,197,94,.45),
+      0 25px 70px rgba(0,0,0,.65);
+  }
+
+  .wheel::after{
+    content:"";
+    position:absolute; inset:14px;
+    border-radius:50%;
+    background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.22), transparent 40%),
+                radial-gradient(circle at 60% 70%, rgba(0,0,0,.35), transparent 45%),
+                linear-gradient(180deg, rgba(0,0,0,.20), rgba(0,0,0,.55));
+    opacity:.45;
+    pointer-events:none;
+  }
+
+  .hub{
+    position:absolute;
+    width:160px;height:160px;
+    border-radius:50%;
+    left:50%; top:50%;
+    transform: translate(-50%,-50%);
+    background: linear-gradient(180deg, rgba(10,14,24,.94), rgba(8,10,16,.96));
+    border:1px solid rgba(255,255,255,.10);
+    box-shadow:
+      inset 0 0 0 1px rgba(255,255,255,.08),
+      inset 0 18px 30px rgba(0,0,0,.55);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:14px;
+    text-align:center;
+    z-index:3;
+  }
+  .centerWord{
+    font-size:18px;
+    font-weight:900;
+    letter-spacing:.3px;
+    line-height:1.15;
+  }
+
+  .label{
+    position:absolute;
+    left:50%; top:50%;
+    transform-origin: 0 0;
+    width:0; height:0;
+    z-index:2;
+    pointer-events:none;
+  }
+  .label span{
+    display:block;
+    transform: translate(0,-118px) rotate(90deg);
+    font-size:12px;
+    font-weight:900;
+    color: rgba(255,255,255,.92);
+    text-shadow: 0 2px 6px rgba(0,0,0,.65);
+    white-space:nowrap;
+    letter-spacing:.2px;
+  }
+
+  .metaRow{
+    width:100%;
+    display:flex; gap:10px; justify-content:space-between; align-items:center;
+    padding:8px 10px;
+    border:1px solid rgba(255,255,255,.08);
+    border-radius:14px;
+    background: rgba(0,0,0,.22);
+  }
+  .pill{ display:flex; align-items:center; gap:8px; color:var(--muted); font-size:13px; }
+  .badge{
+    padding:6px 10px; border-radius:999px;
+    font-weight:900; font-size:12px;
+    border:1px solid rgba(255,255,255,.10);
+    background: rgba(255,255,255,.06);
+  }
+  .badge.good{ color:#bbf7d0; border-color: rgba(34,197,94,.35); background: rgba(34,197,94,.12); }
+  .badge.bad{ color:#fecaca; border-color: rgba(239,68,68,.35); background: rgba(239,68,68,.12); }
+
+  .btn{
+    width:100%;
+    border:none;
+    border-radius:16px;
+    padding:12px 14px;
+    font-weight:900;
+    cursor:pointer;
+    color:var(--text);
+    background: linear-gradient(135deg, rgba(124,92,255,.95), rgba(34,211,238,.70));
+    box-shadow: 0 14px 30px rgba(124,92,255,.25);
+    transition: transform .08s ease, filter .2s ease;
+    font-size: 14px;
+  }
+  .btn:hover{ filter: brightness(1.05); }
+  .btn:active{ transform: translateY(1px) scale(.99); }
+  .btn:disabled{ opacity:.55; cursor:not-allowed; filter:saturate(.7); }
+
+  .question{
+    padding:14px;
+    border-radius:18px;
+    border:1px solid rgba(255,255,255,.10);
+    background: rgba(0,0,0,.18);
+  }
+  .qTitle{
+    display:flex; justify-content:space-between; gap:10px; align-items:center;
+    margin-bottom:10px;
+  }
+  .qTitle h2{ margin:0; font-size:16px; }
+  .timer{
+    font-weight:900;
+    padding:8px 12px;
+    border-radius:999px;
+    border:1px solid rgba(255,255,255,.10);
+    background: rgba(255,255,255,.06);
+  }
+
+  .options{ display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:10px; }
+  .opt{
+    border-radius:16px;
+    padding:12px 12px;
+    border:1px solid rgba(255,255,255,.12);
+    background: rgba(255,255,255,.04);
+    color:var(--text);
+    font-weight:900;
+    cursor:pointer;
+    transition: transform .08s ease, background .2s ease, border-color .2s ease;
+  }
+  .opt:hover{ background: rgba(255,255,255,.06); }
+  .opt:active{ transform: translateY(1px); }
+  .opt:disabled{ opacity:.55; cursor:not-allowed; }
+
+  .shake{
+    animation: shake .35s ease-in-out;
+    border-color: rgba(239,68,68,.55) !important;
+    background: rgba(239,68,68,.10) !important;
+  }
+  @keyframes shake{
+    0%{ transform: translateX(0); }
+    25%{ transform: translateX(-8px); }
+    50%{ transform: translateX(8px); }
+    75%{ transform: translateX(-6px); }
+    100%{ transform: translateX(0); }
+  }
+
+  .msg{
+    margin-top:12px;
+    min-height:40px;
+    display:flex; align-items:center; justify-content:center;
+    font-weight:900;
+    border-radius:16px;
+    padding:10px 12px;
+    border:1px dashed rgba(255,255,255,.12);
+    color:var(--muted);
+    text-align:center;
+  }
+  .msg.good{ color:#bbf7d0; border-color: rgba(34,197,94,.35); background: rgba(34,197,94,.10); }
+  .msg.bad{ color:#fecaca; border-color: rgba(239,68,68,.35); background: rgba(239,68,68,.10); }
+
+  .author{
+    margin-top:10px;
+    text-align:right;
+    font-size:12px;
+    color: rgba(255,255,255,.55);
+    letter-spacing:.2px;
+  }
+
+  /* ===================== SO'Z QO'SHISH PANEL ===================== */
+  .addPanel{
+    background: linear-gradient(180deg, rgba(18,26,43,.95), rgba(12,18,30,.92));
+    border:1px solid rgba(124,92,255,.25);
+    box-shadow: 0 18px 60px rgba(0,0,0,.45), 0 0 0 1px rgba(124,92,255,.10);
+    border-radius: var(--r);
+    padding: 22px;
+    position: relative;
+    overflow: hidden;
+  }
+  .addPanel::before{
+    content:"";
+    position:absolute; inset:-120px;
+    background: conic-gradient(from 40deg, rgba(124,92,255,.15), rgba(34,211,238,.10), rgba(251,191,36,.08), rgba(124,92,255,.15));
+    filter: blur(30px);
+    opacity:.5;
+    z-index:0;
+  }
+  .addPanel > *{ position:relative; z-index:1; }
+
+  .addHeader{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .addHeader h2{
+    margin:0;
+    font-size: 18px;
+    background: linear-gradient(135deg, #fff, rgba(34,211,238,.8));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .wordCount{
+    font-size:13px;
+    color: var(--muted);
+    background: rgba(255,255,255,.06);
+    border: 1px solid rgba(255,255,255,.10);
+    border-radius: 999px;
+    padding: 5px 12px;
+  }
+  .wordCount span{
+    color: var(--accent2);
+    font-weight: 900;
+  }
+
+  .addForm{
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    gap: 12px;
+    align-items: end;
+    margin-bottom: 20px;
+  }
+
+  .fieldGroup{
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .fieldGroup label{
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--muted);
+    letter-spacing: .5px;
+    text-transform: uppercase;
+  }
+  .fieldGroup input{
+    background: rgba(0,0,0,.30);
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 14px;
+    padding: 12px 14px;
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 600;
+    outline: none;
+    transition: border-color .2s, box-shadow .2s;
+    width: 100%;
+  }
+  .fieldGroup input::placeholder{ color: rgba(255,255,255,.25); }
+  .fieldGroup input:focus{
+    border-color: rgba(124,92,255,.55);
+    box-shadow: 0 0 0 3px rgba(124,92,255,.12);
+  }
+
+  .addBtn{
+    background: linear-gradient(135deg, rgba(124,92,255,.95), rgba(34,211,238,.70));
+    border: none;
+    border-radius: 14px;
+    padding: 12px 20px;
+    color: #fff;
+    font-weight: 900;
+    font-size: 18px;
+    cursor: pointer;
+    transition: filter .2s, transform .08s;
+    box-shadow: 0 8px 20px rgba(124,92,255,.25);
+    line-height: 1;
+    height: 46px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .addBtn:hover{ filter: brightness(1.1); }
+  .addBtn:active{ transform: scale(.97); }
+
+  /* So'zlar jadvali */
+  .tableWrap{
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,.08);
+  }
+  .tableHeader{
+    display: grid;
+    grid-template-columns: 40px 1fr 1fr 80px;
+    padding: 10px 16px;
+    background: rgba(255,255,255,.04);
+    border-bottom: 1px solid rgba(255,255,255,.08);
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: .8px;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .wordList{
+    max-height: 260px;
+    overflow-y: auto;
+  }
+  .wordList::-webkit-scrollbar{ width: 4px; }
+  .wordList::-webkit-scrollbar-track{ background: transparent; }
+  .wordList::-webkit-scrollbar-thumb{ background: rgba(255,255,255,.12); border-radius:4px; }
+
+  .wordRow{
+    display: grid;
+    grid-template-columns: 40px 1fr 1fr 80px;
+    padding: 11px 16px;
+    border-bottom: 1px solid rgba(255,255,255,.05);
+    align-items: center;
+    transition: background .15s;
+    animation: rowIn .25s ease;
+  }
+  @keyframes rowIn{
+    from{ opacity:0; transform: translateY(-6px); }
+    to{ opacity:1; transform: translateY(0); }
+  }
+  .wordRow:hover{ background: rgba(255,255,255,.03); }
+  .wordRow:last-child{ border-bottom: none; }
+
+  .rowNum{
+    font-size: 12px;
+    color: rgba(255,255,255,.25);
+    font-weight: 700;
+  }
+  .rowEn{
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--accent2);
+  }
+  .rowUz{
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .rowActions{
+    display: flex;
+    gap: 6px;
+    justify-content: flex-end;
+  }
+
+  .iconBtn{
+    background: none;
+    border: 1px solid rgba(255,255,255,.10);
+    border-radius: 8px;
+    width: 30px; height: 30px;
+    display: flex; align-items:center; justify-content:center;
+    cursor: pointer;
+    transition: background .15s, border-color .15s;
+    font-size: 14px;
+  }
+  .iconBtn:hover{ background: rgba(239,68,68,.15); border-color: rgba(239,68,68,.35); }
+  .iconBtn:active{ transform: scale(.94); }
+
+  .emptyState{
+    padding: 32px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 14px;
+  }
+
+  .toast{
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: rgba(20,30,50,.95);
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 14px;
+    padding: 12px 20px;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+    box-shadow: 0 10px 30px rgba(0,0,0,.5);
+    transition: transform .3s cubic-bezier(.34,1.56,.64,1), opacity .3s;
+    opacity: 0;
+    z-index: 9999;
+    white-space: nowrap;
+  }
+  .toast.show{
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+  .toast.success{ border-color: rgba(34,197,94,.35); color: #bbf7d0; }
+  .toast.error{ border-color: rgba(239,68,68,.35); color: #fecaca; }
+
+  .minWarning{
+    font-size:12px; color: rgba(239,68,68,.8);
+    margin-top: 4px; display:none;
+  }
+
+  @media (max-width: 860px){
+    .gameRow{ grid-template-columns: 1fr; }
+    .wheelBox{ width:280px; height:280px; }
+    .wheel{ width:260px; height:260px; }
+    .hub{ width:150px; height:150px; }
+    .label span{ transform: translate(0,-110px) rotate(90deg); }
+    .addForm{ grid-template-columns: 1fr 1fr; }
+    .addBtn{ grid-column: 1/-1; width:100%; }
+    .tableHeader, .wordRow{ grid-template-columns: 30px 1fr 1fr 60px; }
+  }
+  @media (max-width: 540px){
+    .addForm{ grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+
+<body>
+<div class="wrapper">
+
+  <!-- ===== O'YIN ===== -->
+  <div class="gameRow">
+
+    <!-- LEFT: WHEEL -->
+    <div class="panel">
+      <h1>🎡 Baraban So'z O'yini</h1>
+      <p class="sub">Aylantir → to'xtaydi → variantlar chiqadi → 10 sekund ichida to'g'ri tarjimani bos.</p>
+
+      <div class="wheelWrap">
+        <div class="pointer"></div>
+
+        <div class="wheelBox">
+          <div id="wheel" class="wheel" aria-label="wheel"></div>
+          <div class="hub">
+            <div id="centerWord" class="centerWord">START</div>
+          </div>
+        </div>
+
+        <div class="metaRow">
+          <div class="pill">⏳ Vaqt: <span id="timeLeft" class="badge">—</span></div>
+          <div class="pill">🎲 Holat: <span id="state" class="badge good">Tayyor</span></div>
+        </div>
+
+        <button id="spinBtn" class="btn">Barabanni aylantir 🎡</button>
+      </div>
+
+      <div class="author">Muallif: Abdullajonov Ozodbek.</div>
+    </div>
+
+    <!-- RIGHT: OPTIONS -->
+    <div class="panel">
+      <h1>Javoblar</h1>
+      <p class="sub" style="margin-bottom:12px">Noto'g'ri bosilsa o'sha variant qimirlaydi. To'g'ri bo'lmasa keyingi savolga o'tmaydi.</p>
+
+      <div class="question">
+        <div class="qTitle">
+          <h2>So'z: <span id="qWord" style="color:var(--accent2)">—</span></h2>
+          <div class="timer">⏳ <span id="timerText">10</span>s</div>
+        </div>
+
+        <div id="options" class="options"></div>
+
+        <div id="msg" class="msg">Barabanni aylantirishni bosing 👈</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ===== SO'Z QO'SHISH PANEL ===== -->
+  <div class="addPanel">
+    <div class="addHeader">
+      <h2>📝 So'zlarni boshqarish</h2>
+      <div class="wordCount">Jami: <span id="wordCountNum">0</span> ta so'z</div>
+    </div>
+
+    <div class="addForm">
+      <div class="fieldGroup">
+        <label>🇬🇧 Inglizcha</label>
+        <input id="inputEn" type="text" placeholder="Masalan: Apple" autocomplete="off" />
+      </div>
+      <div class="fieldGroup">
+        <label>🇺🇿 O'zbekcha</label>
+        <input id="inputUz" type="text" placeholder="Masalan: Olma" autocomplete="off" />
+      </div>
+      <button class="addBtn" id="addWordBtn" title="Qo'shish">＋</button>
+    </div>
+
+    <p class="minWarning" id="minWarning">⚠️ O'yin uchun kamida 4 ta so'z kerak!</p>
+
+    <div class="tableWrap">
+      <div class="tableHeader">
+        <span>#</span>
+        <span>Inglizcha</span>
+        <span>O'zbekcha</span>
+        <span></span>
+      </div>
+      <div class="wordList" id="wordList"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Toast xabar -->
+<div class="toast" id="toast"></div>
+
+<script>
+  // ============================================================
+  //  SO'ZLAR
+  // ============================================================
+  let items = [
+    { en:"Balloon",   uz:"Shar" },
+    { en:"Spider",    uz:"O'rgimchak" },
+    { en:"Money",     uz:"Pul" },
+    { en:"Ring",      uz:"Uzuk" },
+    { en:"Sunflower", uz:"Kungaboqar" },
+    { en:"Grapes",    uz:"Uzum" },
+    { en:"Window",    uz:"Deraza" },
+    { en:"Door",      uz:"Eshik" },
+    { en:"Wall",      uz:"Devor" },
+    { en:"Picture",   uz:"Rasm" },
+  ];
+
+  // ============================================================
+  //  TOAST
+  // ============================================================
+  let toastTimer;
+  function showToast(text, type="success"){
+    const t = document.getElementById("toast");
+    t.textContent = text;
+    t.className = "toast show " + type;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { t.className = "toast"; }, 2500);
+  }
+
+  // ============================================================
+  //  SO'ZLAR JADVALI
+  // ============================================================
+  function renderWordList(){
+    const list = document.getElementById("wordList");
+    document.getElementById("wordCountNum").textContent = items.length;
+
+    if(items.length === 0){
+      list.innerHTML = `<div class="emptyState">Hali so'z qo'shilmagan 📭</div>`;
+      return;
+    }
+
+    list.innerHTML = "";
+    items.forEach((item, i) => {
+      const row = document.createElement("div");
+      row.className = "wordRow";
+      row.innerHTML = `
+        <span class="rowNum">${i+1}</span>
+        <span class="rowEn">${escHtml(item.en)}</span>
+        <span class="rowUz">${escHtml(item.uz)}</span>
+        <span class="rowActions">
+          <button class="iconBtn" title="O'chirish" onclick="deleteWord(${i})">🗑️</button>
+        </span>
+      `;
+      list.appendChild(row);
+    });
+  }
+
+  function escHtml(str){
+    return str.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  }
+
+  // ============================================================
+  //  SO'Z QO'SHISH
+  // ============================================================
+  document.getElementById("addWordBtn").addEventListener("click", addWord);
+  document.getElementById("inputEn").addEventListener("keydown", e => { if(e.key==="Enter") document.getElementById("inputUz").focus(); });
+  document.getElementById("inputUz").addEventListener("keydown", e => { if(e.key==="Enter") addWord(); });
+
+  function addWord(){
+    const enInput = document.getElementById("inputEn");
+    const uzInput = document.getElementById("inputUz");
+
+    const en = enInput.value.trim();
+    const uz = uzInput.value.trim();
+
+    if(!en || !uz){
+      showToast("Ikkala maydonni ham to'ldiring! ✏️", "error");
+      return;
+    }
+
+    // Takrorni tekshirish
+    const exists = items.some(x => x.en.toLowerCase() === en.toLowerCase());
+    if(exists){
+      showToast(`"${en}" so'zi allaqachon bor! ❌`, "error");
+      return;
+    }
+
+    items.push({ en, uz });
+    enInput.value = "";
+    uzInput.value = "";
+    enInput.focus();
+
+    renderWordList();
+    rebuildGame();
+    showToast(`"${en}" qo'shildi ✅`);
+  }
+
+  // ============================================================
+  //  SO'Z O'CHIRISH
+  // ============================================================
+  function deleteWord(index){
+    if(items.length <= 4){
+      document.getElementById("minWarning").style.display = "block";
+      setTimeout(() => document.getElementById("minWarning").style.display = "none", 3000);
+      showToast("Kamida 4 ta so'z bo'lishi kerak! ⚠️", "error");
+      return;
+    }
+
+    const removed = items[index];
+    items.splice(index, 1);
+    renderWordList();
+    rebuildGame();
+    showToast(`"${removed.en}" o'chirildi 🗑️`, "error");
+  }
+
+  // ============================================================
+  //  O'YIN LOGIKASI
+  // ============================================================
+  const wheelEl = document.getElementById("wheel");
+  const centerWordEl = document.getElementById("centerWord");
+  const spinBtn = document.getElementById("spinBtn");
+  const optionsEl = document.getElementById("options");
+  const msgEl = document.getElementById("msg");
+  const qWordEl = document.getElementById("qWord");
+  const timeLeftEl = document.getElementById("timeLeft");
+  const timerTextEl = document.getElementById("timerText");
+  const stateEl = document.getElementById("state");
+
+  let N, segmentDeg;
+  let currentRotation = 0;
+  let spinning = false;
+  let canAnswer = false;
+  let timer = null;
+  let timeLeft = 10;
+  let currentItem = null;
+  let currentIndex = 0;
+
+  function rebuildGame(){
+    N = items.length;
+    segmentDeg = 360 / N;
+    buildWheel();
+    // O'yin davom etayotgan bo'lsa to'xtat
+    stopTimer();
+    canAnswer = false;
+    spinning = false;
+    clearOptions();
+    centerWordEl.textContent = "START";
+    qWordEl.textContent = "—";
+    timeLeftEl.textContent = "—";
+    timerTextEl.textContent = "10";
+    setState("Tayyor", true);
+    setMsg("Barabanni aylantirishni bosing 👈", null);
+    spinBtn.disabled = false;
+    currentIndex = 0;
+  }
+
+  function setMsg(text, type=null){
+    msgEl.className = "msg" + (type ? " " + type : "");
+    msgEl.textContent = text;
+  }
+  function setState(text, good=true){
+    stateEl.textContent = text;
+    stateEl.className = "badge " + (good ? "good" : "bad");
+  }
+  function stopTimer(){
+    if(timer){ clearInterval(timer); timer = null; }
+  }
+  function startTimer(){
+    stopTimer();
+    timeLeft = 10;
+    timerTextEl.textContent = timeLeft;
+    timeLeftEl.textContent = timeLeft + "s";
+    timer = setInterval(() => {
+      timeLeft--;
+      timerTextEl.textContent = timeLeft;
+      timeLeftEl.textContent = timeLeft + "s";
+      if(timeLeft <= 0){
+        stopTimer();
+        canAnswer = false;
+        disableOptions(true);
+        setState("Vaqt tugadi", false);
+        setMsg("⏰ Vaqt tugadi! Yana barabanni aylantir.", "bad");
+        spinBtn.disabled = false;
+      }
+    }, 1000);
+  }
+  function disableOptions(disabled){
+    optionsEl.querySelectorAll("button").forEach(b => b.disabled = disabled);
+  }
+  function clearOptions(){ optionsEl.innerHTML = ""; }
+
+  function buildWheel(){
+    wheelEl.innerHTML = "";
+    for(let i=0; i<N; i++){
+      const lab = document.createElement("div");
+      lab.className = "label";
+      lab.style.transform = `rotate(${i * segmentDeg}deg)`;
+      const sp = document.createElement("span");
+      sp.textContent = items[i].en;
+      lab.appendChild(sp);
+      wheelEl.appendChild(lab);
+    }
+  }
+
+  function showOptions(item){
+    clearOptions();
+    const wrongPool = items.filter(x => x.uz !== item.uz).map(x => x.uz);
+    wrongPool.sort(() => Math.random() - 0.5);
+    const wrongs = wrongPool.slice(0, 3);
+    const all = [item.uz, ...wrongs].sort(() => Math.random() - 0.5);
+
+    all.forEach(optText => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "opt";
+      btn.textContent = optText;
+      btn.addEventListener("click", () => {
+        if(!canAnswer) return;
+        if(optText === item.uz){
+          canAnswer = false;
+          stopTimer();
+          disableOptions(true);
+          setState("To'g'ri ✅", true);
+          setMsg("🎉 To'g'ri! Endi yana aylantir!", "good");
+          wheelEl.classList.add("win");
+          const victory = currentRotation + 360;
+          wheelEl.style.transition = "transform 0.9s cubic-bezier(.12,.86,.12,1)";
+          wheelEl.style.transform = `rotate(${victory}deg)`;
+          currentRotation = victory;
+          setTimeout(() => {
+            wheelEl.classList.remove("win");
+            wheelEl.style.transition = "transform 2.9s cubic-bezier(.12,.86,.12,1)";
+            spinBtn.disabled = false;
+          }, 950);
+        } else {
+          btn.classList.remove("shake");
+          void btn.offsetWidth;
+          btn.classList.add("shake");
+          setState("Xato ❌", false);
+          setMsg("❌ Noto'g'ri! Yana urin (vaqt ketmoqda).", "bad");
+        }
+      });
+      optionsEl.appendChild(btn);
+    });
+    disableOptions(false);
+  }
+
+  function pickRandomIndexAvoidRepeat(prevIdx){
+    if(N <= 1) return 0;
+    let idx = Math.floor(Math.random() * N);
+    while(idx === prevIdx) idx = Math.floor(Math.random() * N);
+    return idx;
+  }
+
+  function spin(){
+    if(spinning) return;
+    spinning = true;
+    canAnswer = false;
+    spinBtn.disabled = true;
+    clearOptions();
+    stopTimer();
+    centerWordEl.textContent = "AYLANMOQDA…";
+    qWordEl.textContent = "—";
+    timeLeftEl.textContent = "—";
+    timerTextEl.textContent = "10";
+    setState("Aylanmoqda...", true);
+    setMsg("Baraban aylanmoqda... ⏳", null);
+
+    const nextIndex = pickRandomIndexAvoidRepeat(currentIndex);
+    currentIndex = nextIndex;
+    currentItem = items[currentIndex];
+
+    const target = -currentIndex * segmentDeg;
+    const fullSpins = 4 * 360;
+    const extraJitter = (Math.random() * 10) - 5;
+    const newRotation = currentRotation + fullSpins + (target - (currentRotation % 360)) + extraJitter;
+    wheelEl.style.transform = `rotate(${newRotation}deg)`;
+    currentRotation = newRotation;
+
+    setTimeout(() => {
+      spinning = false;
+      centerWordEl.textContent = currentItem.en;
+      qWordEl.textContent = currentItem.en;
+      setState("Javob ber", true);
+      setMsg("✅ Variantlardan to'g'risini tanla (10 sekund).", null);
+      showOptions(currentItem);
+      canAnswer = true;
+      startTimer();
+    }, 2950);
+  }
+
+  // ============================================================
+  //  ISHGA TUSHIRISH
+  // ============================================================
+  rebuildGame();
+  spinBtn.addEventListener("click", spin);
+  renderWordList();
+</script>
+</body>
+</html>
